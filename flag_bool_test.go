@@ -9,7 +9,7 @@ import (
 	"github.com/go-extras/cobraflags"
 )
 
-func boolToString(value bool) string {
+func boolToString(value bool) string { //revive:disable-line:flag-parameter // not a control flag
 	if value {
 		return "true"
 	}
@@ -93,7 +93,7 @@ func TestBoolFlag_WithRequired(t *testing.T) {
 	flag.Register(cmd)
 
 	// Test missing required flag
-	cmd.SetArgs([]string{})
+	cmd.SetArgs(make([]string, 0))
 	err := cmd.Execute()
 
 	c.Assert(err, qt.Not(qt.IsNil))
@@ -141,7 +141,7 @@ func TestBoolFlag_WithValidation(t *testing.T) {
 		Name:  "feature",
 		Value: false,
 		Usage: "enable feature",
-		ValidateFunc: func(value bool) error {
+		ValidateFunc: func(bool) error {
 			return errors.New("invalid value")
 		},
 	}

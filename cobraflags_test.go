@@ -1,7 +1,6 @@
 package cobraflags_test
 
 import (
-	"fmt"
 	"testing"
 
 	qt "github.com/frankban/quicktest"
@@ -56,9 +55,8 @@ func newCobraCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "myapp",
 		Short: "An example CLI",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			config, _ := cmd.Flags().GetString("config")
-			fmt.Println("Using config:", config)
+		RunE: func(cmd *cobra.Command, _args []string) error {
+			_, _ = cmd.Flags().GetString("config")
 			return nil
 		},
 		SilenceUsage:  true,

@@ -1,4 +1,4 @@
-package cobraflags
+package cobraflags //nolint:dupl // False positive, this is a separate file for a different flag type
 
 import (
 	"github.com/spf13/cobra"

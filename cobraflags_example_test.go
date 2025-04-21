@@ -21,7 +21,7 @@ func ExampleIntFlag() {
 	cmd := &cobra.Command{
 		Use:   "process",
 		Short: "Process items",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_cmd *cobra.Command, _args []string) {
 			value := myFlag.GetInt()
 			fmt.Printf("Processing %d items\n", value)
 		},
@@ -47,7 +47,7 @@ func ExampleStringFlag() {
 	cmd := &cobra.Command{
 		Use:   "greet",
 		Short: "Greeting application",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_cmd *cobra.Command, _args []string) {
 			message := myFlag.GetString()
 			fmt.Printf("Message: %s\n", message)
 		},
@@ -73,7 +73,7 @@ func ExampleBoolFlag() {
 	cmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run the application",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_cmd *cobra.Command, _args []string) {
 			if myFlag.GetBool() {
 				fmt.Println("Verbose mode enabled")
 			} else {
@@ -102,7 +102,7 @@ func ExampleStringSliceFlag() {
 	cmd := &cobra.Command{
 		Use:   "process",
 		Short: "Process items",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_cmd *cobra.Command, _args []string) {
 			items := myFlag.GetStringSlice()
 			fmt.Printf("Processing items: %v\n", items)
 		},
@@ -128,7 +128,7 @@ func ExampleUint8Flag() {
 	cmd := &cobra.Command{
 		Use:   "setlevel",
 		Short: "Set the level",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_cmd *cobra.Command, _args []string) {
 			level := myFlag.GetUint8()
 			fmt.Printf("Setting level to %d\n", level)
 		},
@@ -160,7 +160,7 @@ func ExampleIntFlag_withValidation() {
 	cmd := &cobra.Command{
 		Use:   "process",
 		Short: "Process items",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_cmd *cobra.Command, _args []string) {
 			value, err := myFlag.GetIntE()
 			if err != nil {
 				fmt.Printf("Validation error: %v\n", err)
@@ -195,7 +195,7 @@ func ExampleRegister() {
 	cmd := &cobra.Command{
 		Use:   "app",
 		Short: "Example application",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_cmd *cobra.Command, _args []string) {
 			count := countFlag.GetInt()
 			verbose := verboseFlag.GetBool()
 
@@ -204,7 +204,7 @@ func ExampleRegister() {
 	}
 
 	cobraflags.Register(cmd, countFlag, verboseFlag)
-	cmd.SetArgs([]string{})
+	cmd.SetArgs(make([]string, 0))
 	_ = cmd.Execute()
 
 	// Output:
@@ -226,7 +226,7 @@ func ExampleCobraOnInitialize() {
 	cmd := &cobra.Command{
 		Use:   "greet",
 		Short: "Greeting application",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_cmd *cobra.Command, _args []string) {
 			message := messageFlag.GetString()
 			fmt.Printf("Message: %s\n", message)
 		},
@@ -234,7 +234,7 @@ func ExampleCobraOnInitialize() {
 
 	messageFlag.Register(cmd)
 	cobraflags.CobraOnInitialize("MYAPP", cmd)
-	cmd.SetArgs([]string{})
+	cmd.SetArgs(make([]string, 0))
 	_ = cmd.Execute()
 
 	// Output:

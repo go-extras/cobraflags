@@ -104,7 +104,7 @@ func TestStringSliceFlag_WithRequired(t *testing.T) {
 	flag.Register(cmd)
 
 	// Test missing required flag
-	cmd.SetArgs([]string{})
+	cmd.SetArgs(make([]string, 0))
 	err := cmd.Execute()
 
 	c.Assert(err, qt.Not(qt.IsNil))
