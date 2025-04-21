@@ -1,6 +1,8 @@
 # CobraFlags
 
-`cobraflags` is a Go package that provides an integration layer between [Cobra](https://github.com/spf13/cobra)
+[![Build Status](https://github.com/go-extras/cobraflags/actions/workflows/go-test.yml/badge.svg)](https://github.com/go-extras/cobraflags/actions/workflows/go-test.yml)
+
+`cobraflags` is a Go module that provides an integration layer between [Cobra](https://github.com/spf13/cobra)
 CLI applications and [Viper](https://github.com/spf13/viper) configuration management. It automates the binding
 of environment variables to Cobra command flags, simplifying the process of managing configurations in CLI applications.
 
