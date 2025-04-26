@@ -77,6 +77,20 @@ myFlag.ValidateFunc = func(value int) error {
 }
 ```
 
+You can also use the `Validator` field to provide a custom validator that implements the `cobraflags.Validator`
+interface:
+
+```go
+myFlag.Validator = cobraflags.ValidatorFunc[int](func(value int) error {
+	if value < 0 {
+		return fmt.Errorf("value must be non-negative")
+	}
+	return nil
+})
+```
+
+_Note: cobraflags.ValidatorFunc is used for demonstration purposes only, use your own validators_.
+
 ## Documentation
 
 For detailed documentation, refer to the source code and comments in the package.

@@ -136,6 +136,33 @@ func TestIntFlag_ValidateFunc(t *testing.T) {
 	c.Assert(err.Error(), qt.Equals, "invalid value -1 for flag name")
 }
 
+func TestIntFlag_Validator(t *testing.T) {
+	c := qt.New(t)
+
+	cmd := newCobraCommand()
+	flag := &cobraflags.IntFlag{
+		Name:  "name",
+		Value: 0,
+		Usage: "usage",
+		Validator: cobraflags.ValidatorFunc[int](func(v int) error {
+			if v < 0 {
+				return fmt.Errorf("invalid value %d for flag %s", v, "name")
+			}
+			return nil
+		}),
+	}
+
+	flag.Register(cmd)
+
+	cmd.SetArgs([]string{"--name", "-1"})
+	err := cmd.Execute()
+
+	c.Assert(err, qt.IsNil)
+
+	_, err = flag.GetIntE()
+	c.Assert(err.Error(), qt.Equals, "invalid value -1 for flag name")
+}
+
 func TestIntFlag_WithPersistent(t *testing.T) {
 	c := qt.New(t)
 

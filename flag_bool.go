@@ -11,6 +11,9 @@ var _ Flag = (*BoolFlag)(nil)
 // BoolFlag is a flag that holds a boolean value.
 type BoolFlag FlagBase[bool]
 
+// pBoolFlag is an alias for a pointer to FlagBase[bool].
+type pBoolFlag = *FlagBase[bool]
+
 func (s *BoolFlag) Register(cmd *cobra.Command) {
 	var flags *pflag.FlagSet
 	if s.Persistent {
@@ -44,11 +47,8 @@ func (s *BoolFlag) GetBoolE() (bool, error) {
 
 	v := viper.GetBool(s.Name)
 
-	if s.ValidateFunc != nil {
-		err := s.ValidateFunc(v)
-		if err != nil {
-			return false, err
-		}
+	if result, err := pBoolFlag(s).validate(v); err != nil {
+		return result, err
 	}
 
 	return v, nil

@@ -145,6 +145,33 @@ func TestUint8Flag_ValidateFunc(t *testing.T) {
 	c.Assert(err.Error(), qt.Equals, "level must be <= 100")
 }
 
+func TestUint8Flag_Validator(t *testing.T) {
+	c := qt.New(t)
+
+	cmd := newCobraCommand()
+	flag := &cobraflags.Uint8Flag{
+		Name:  "level",
+		Value: 0,
+		Usage: "set level",
+		Validator: cobraflags.ValidatorFunc[uint8](func(v uint8) error {
+			if v > 100 {
+				return errors.New("level must be <= 100")
+			}
+			return nil
+		}),
+	}
+
+	flag.Register(cmd)
+
+	cmd.SetArgs([]string{"--level", "150"})
+	err := cmd.Execute()
+
+	c.Assert(err, qt.IsNil)
+
+	_, err = flag.GetUint8E()
+	c.Assert(err.Error(), qt.Equals, "level must be <= 100")
+}
+
 func TestUint8Flag_WithPersistent(t *testing.T) {
 	c := qt.New(t)
 

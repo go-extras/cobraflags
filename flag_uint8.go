@@ -12,6 +12,9 @@ var _ Flag = (*Uint8Flag)(nil)
 // Uint8Flag is a flag that holds an uint8 value.
 type Uint8Flag FlagBase[uint8]
 
+// pUint8Flag is an alias for a pointer to FlagBase[uint8].
+type pUint8Flag = *FlagBase[uint8]
+
 func (s *Uint8Flag) Register(cmd *cobra.Command) {
 	var flags *pflag.FlagSet
 	if s.Persistent {
@@ -46,11 +49,8 @@ func (s *Uint8Flag) GetUint8E() (uint8, error) {
 	u16 := viper.GetUint16(s.Name)
 	v := cast.ToUint8(u16)
 
-	if s.ValidateFunc != nil {
-		err := s.ValidateFunc(v)
-		if err != nil {
-			return 0, err
-		}
+	if result, err := pUint8Flag(s).validate(v); err != nil {
+		return result, err
 	}
 
 	return v, nil
