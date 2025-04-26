@@ -1,4 +1,4 @@
-package cobraflags //nolint:dupl // False positive, this is a separate file for a different flag type
+package cobraflags
 
 import (
 	"github.com/spf13/cobra"
@@ -10,6 +10,9 @@ var _ Flag = (*StringFlag)(nil)
 
 // StringFlag is a flag that holds a string value.
 type StringFlag FlagBase[string]
+
+// pStringFlag is an alias for a pointer to FlagBase[string].
+type pStringFlag = *FlagBase[string]
 
 func (s *StringFlag) Register(cmd *cobra.Command) {
 	var flags *pflag.FlagSet
@@ -44,11 +47,8 @@ func (s *StringFlag) GetStringE() (string, error) {
 
 	v := viper.GetString(s.Name)
 
-	if s.ValidateFunc != nil {
-		err := s.ValidateFunc(v)
-		if err != nil {
-			return "", err
-		}
+	if result, err := pStringFlag(s).validate(v); err != nil {
+		return result, err
 	}
 
 	return v, nil

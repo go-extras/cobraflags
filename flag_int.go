@@ -1,4 +1,4 @@
-package cobraflags //nolint:dupl // False positive, this is a separate file for a different flag type
+package cobraflags
 
 import (
 	"github.com/spf13/cobra"
@@ -10,6 +10,9 @@ var _ Flag = (*IntFlag)(nil)
 
 // IntFlag is a flag that holds an integer value.
 type IntFlag FlagBase[int]
+
+// pIntFlag is an alias for a pointer to FlagBase[int].
+type pIntFlag = *FlagBase[int]
 
 func (s *IntFlag) Register(cmd *cobra.Command) {
 	var flags *pflag.FlagSet
@@ -44,11 +47,8 @@ func (s *IntFlag) GetIntE() (int, error) {
 
 	v := viper.GetInt(s.Name)
 
-	if s.ValidateFunc != nil {
-		err := s.ValidateFunc(v)
-		if err != nil {
-			return 0, err
-		}
+	if result, err := pIntFlag(s).validate(v); err != nil {
+		return result, err
 	}
 
 	return v, nil

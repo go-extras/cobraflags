@@ -1,7 +1,7 @@
 package cobraflags_test
 
 import (
-	"errors"
+	"fmt"
 	"testing"
 
 	qt "github.com/frankban/quicktest"
@@ -134,15 +134,13 @@ func TestBoolFlag_Persistent(t *testing.T) {
 func TestBoolFlag_WithValidation(t *testing.T) {
 	c := qt.New(t)
 
-	var validationCalled bool
-
 	cmd := newCobraCommand()
 	flag := &cobraflags.BoolFlag{
 		Name:  "feature",
 		Value: false,
 		Usage: "enable feature",
-		ValidateFunc: func(bool) error {
-			return errors.New("invalid value")
+		ValidateFunc: func(v bool) error {
+			return fmt.Errorf("%v is invalid value", v)
 		},
 	}
 
@@ -152,12 +150,33 @@ func TestBoolFlag_WithValidation(t *testing.T) {
 	err := cmd.Execute()
 	c.Assert(err, qt.IsNil)
 
-	// GetBool doesn't call validation
-	_ = flag.GetBool()
-	c.Assert(validationCalled, qt.IsFalse)
+	// GetBoolE calls validation
+	_, err = flag.GetBoolE()
+	c.Assert(err, qt.IsNotNil)
+	c.Assert(err.Error(), qt.Equals, "true is invalid value")
+}
+
+func TestBoolFlag_WithValidator(t *testing.T) {
+	c := qt.New(t)
+
+	cmd := newCobraCommand()
+	flag := &cobraflags.BoolFlag{
+		Name:  "feature",
+		Value: false,
+		Usage: "enable feature",
+		Validator: cobraflags.ValidatorFunc[bool](func(v bool) error {
+			return fmt.Errorf("%v is invalid value", v)
+		}),
+	}
+
+	flag.Register(cmd)
+
+	cmd.SetArgs([]string{"--feature", "true"})
+	err := cmd.Execute()
+	c.Assert(err, qt.IsNil)
 
 	// GetBoolE calls validation
 	_, err = flag.GetBoolE()
 	c.Assert(err, qt.IsNotNil)
-	c.Assert(err.Error(), qt.Equals, "invalid value")
+	c.Assert(err.Error(), qt.Equals, "true is invalid value")
 }

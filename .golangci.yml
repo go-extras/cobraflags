@@ -230,6 +230,9 @@ linters:
           - lll
           - nestif
         path: '_test\.go$'
+      - linters:
+          - dupl
+        path: 'flag_.*[^_]\.go$' # ignore dupl for flag_*.go files (but check tests)
     paths:
       - 'third_party$'
       - 'builtin$'

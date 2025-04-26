@@ -9,7 +9,7 @@ import (
 	"github.com/go-extras/cobraflags"
 )
 
-// ExampleIntFlag demonstrates how to use an IntFlag with Cobra commands
+// ExampleIntFlag demonstrates how to use an IntFlag with Cobra commands.
 func ExampleIntFlag() {
 	myFlag := &cobraflags.IntFlag{
 		Name:     "count",
@@ -35,7 +35,7 @@ func ExampleIntFlag() {
 	// Processing 10 items
 }
 
-// ExampleStringFlag demonstrates how to use a StringFlag with Cobra commands
+// ExampleStringFlag demonstrates how to use a StringFlag with Cobra commands.
 func ExampleStringFlag() {
 	myFlag := &cobraflags.StringFlag{
 		Name:     "message",
@@ -61,7 +61,7 @@ func ExampleStringFlag() {
 	// Message: Hello, Cobra!
 }
 
-// ExampleBoolFlag demonstrates how to use a BoolFlag with Cobra commands
+// ExampleBoolFlag demonstrates how to use a BoolFlag with Cobra commands.
 func ExampleBoolFlag() {
 	myFlag := &cobraflags.BoolFlag{
 		Name:     "verbose",
@@ -90,7 +90,7 @@ func ExampleBoolFlag() {
 	// Verbose mode enabled
 }
 
-// ExampleStringSliceFlag demonstrates how to use a StringSliceFlag with Cobra commands
+// ExampleStringSliceFlag demonstrates how to use a StringSliceFlag with Cobra commands.
 func ExampleStringSliceFlag() {
 	myFlag := &cobraflags.StringSliceFlag{
 		Name:     "items",
@@ -116,7 +116,7 @@ func ExampleStringSliceFlag() {
 	// Processing items: [item3 item4]
 }
 
-// ExampleUint8Flag demonstrates how to use a Uint8Flag with Cobra commands
+// ExampleUint8Flag demonstrates how to use a Uint8Flag with Cobra commands.
 func ExampleUint8Flag() {
 	myFlag := &cobraflags.Uint8Flag{
 		Name:     "level",
@@ -142,7 +142,7 @@ func ExampleUint8Flag() {
 	// Setting level to 200
 }
 
-// ExampleIntFlag_withValidation demonstrates adding validation to an IntFlag
+// ExampleIntFlag_withValidation demonstrates adding validation to an IntFlag.
 func ExampleIntFlag_withValidation() {
 	myFlag := &cobraflags.IntFlag{
 		Name:     "count",
@@ -178,7 +178,44 @@ func ExampleIntFlag_withValidation() {
 	// Validation error: count must be positive
 }
 
-// ExampleRegister demonstrates how to register multiple flags at once
+// ExampleIntFlag_withValidator demonstrates using a custom validator with an IntFlag.
+func ExampleIntFlag_withValidator() {
+	myFlag := &cobraflags.IntFlag{
+		Name:     "count",
+		Usage:    "Number of items to process (must be between 1 and 100)",
+		Value:    10,
+		Required: true,
+		Validator: cobraflags.ValidatorFunc[int](func(value int) error {
+			v := value
+			if v < 1 || v > 100 {
+				return fmt.Errorf("count must be between 1 and 100")
+			}
+			return nil
+		}),
+	}
+
+	cmd := &cobra.Command{
+		Use:   "process",
+		Short: "Process items",
+		Run: func(_cmd *cobra.Command, _args []string) {
+			value, err := myFlag.GetIntE()
+			if err != nil {
+				fmt.Printf("Validation error: %v\n", err)
+				return
+			}
+			fmt.Printf("Processing %d items\n", value)
+		},
+	}
+
+	myFlag.Register(cmd)
+	cmd.SetArgs([]string{"--count", "150"})
+	_ = cmd.Execute()
+
+	// Output:
+	// Validation error: count must be between 1 and 100
+}
+
+// ExampleRegister demonstrates how to register multiple flags at once.
 func ExampleRegister() {
 	countFlag := &cobraflags.IntFlag{
 		Name:  "count",
@@ -211,7 +248,7 @@ func ExampleRegister() {
 	// Count: 3, Verbose: true
 }
 
-// ExampleCobraOnInitialize demonstrates environment variable binding
+// ExampleCobraOnInitialize demonstrates environment variable binding.
 func ExampleCobraOnInitialize() {
 	// Set environment variable for demo
 	os.Setenv("MYAPP_MESSAGE", "from environment")

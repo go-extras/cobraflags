@@ -145,6 +145,33 @@ func TestStringFlag_ValidateFunc(t *testing.T) {
 	c.Assert(err.Error(), qt.Equals, "invalid value for flag name")
 }
 
+func TestStringFlag_Validator(t *testing.T) {
+	c := qt.New(t)
+
+	cmd := newCobraCommand()
+	flag := &cobraflags.StringFlag{
+		Name:  "name",
+		Value: "default",
+		Usage: "usage",
+		Validator: cobraflags.ValidatorFunc[string](func(v string) error {
+			if v == "" {
+				return fmt.Errorf("invalid value for flag %s", "name")
+			}
+			return nil
+		}),
+	}
+
+	flag.Register(cmd)
+
+	cmd.SetArgs([]string{"--name", ""})
+	err := cmd.Execute()
+
+	c.Assert(err, qt.IsNil)
+
+	_, err = flag.GetStringE()
+	c.Assert(err.Error(), qt.Equals, "invalid value for flag name")
+}
+
 func TestStringFlag_WithPersistent(t *testing.T) {
 	c := qt.New(t)
 

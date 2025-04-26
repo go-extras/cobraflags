@@ -145,6 +145,33 @@ func TestStringSliceFlag_ValidateFunc(t *testing.T) {
 	c.Assert(err.Error(), qt.Equals, "invalid value for flag items")
 }
 
+func TestStringSliceFlag_Validator(t *testing.T) {
+	c := qt.New(t)
+
+	cmd := newCobraCommand()
+	flag := &cobraflags.StringSliceFlag{
+		Name:  "items",
+		Value: []string{"default1", "default2"},
+		Usage: "usage",
+		Validator: cobraflags.ValidatorFunc[[]string](func(v []string) error {
+			if len(v) == 0 {
+				return fmt.Errorf("invalid value for flag %s", "items")
+			}
+			return nil
+		}),
+	}
+
+	flag.Register(cmd)
+
+	cmd.SetArgs([]string{"--items", ""})
+	err := cmd.Execute()
+
+	c.Assert(err, qt.IsNil)
+
+	_, err = flag.GetStringSliceE()
+	c.Assert(err.Error(), qt.Equals, "invalid value for flag items")
+}
+
 func TestStringSliceFlag_WithPersistent(t *testing.T) {
 	c := qt.New(t)
 

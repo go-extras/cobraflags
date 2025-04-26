@@ -44,12 +44,35 @@ type FlagBase[T any] struct {
 	Persistent   bool
 	Value        T // Default value
 	ValidateFunc func(T) error
+	Validator    Validator
 
 	flag     *pflag.Flag
 	bindOnce sync.Once
 
 	flagGetter
 	flagGetterE
+}
+
+// validate applies custom validation logic if defined and returns the value or an error if validation fails.
+// If no custom validation is defined, it returns the value and nil.
+// If both ValidateFunc and Validator are defined, ValidateFunc takes precedence.
+// If validation fails, it returns the zero value of the type and the error.
+func (s *FlagBase[T]) validate(v T) (result T, err error) {
+	if s.ValidateFunc != nil {
+		err = s.ValidateFunc(v)
+		if err != nil {
+			return result, err
+		}
+	}
+
+	if s.Validator != nil {
+		err = s.Validator.Validate(v)
+		if err != nil {
+			return result, err
+		}
+	}
+
+	return v, nil
 }
 
 // Register registers the given flags with the given cobra command.
