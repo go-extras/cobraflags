@@ -19,7 +19,7 @@ func TestEnvironmentVariableEdgeCases(t *testing.T) {
 		envValue    string
 		flagType    string
 		expectError bool
-		expectedVal interface{}
+		expectedVal any
 	}{
 		{
 			name:        "empty_string_value",
@@ -138,7 +138,7 @@ func TestEnvironmentVariableEdgeCases(t *testing.T) {
 
 			cmd := &cobra.Command{
 				Use: "edgecase",
-				Run: func(cmd *cobra.Command, args []string) {},
+				Run: func(_ *cobra.Command, _ []string) {},
 			}
 
 			switch tt.flagType {
@@ -151,7 +151,7 @@ func TestEnvironmentVariableEdgeCases(t *testing.T) {
 				flag.Register(cmd)
 				cobraflags.CobraOnInitialize("EDGECASE", cmd)
 
-				cmd.SetArgs([]string{})
+				cmd.SetArgs(make([]string, 0))
 				err := cmd.Execute()
 				c.Assert(err, qt.IsNil)
 
@@ -167,7 +167,7 @@ func TestEnvironmentVariableEdgeCases(t *testing.T) {
 				flag.Register(cmd)
 				cobraflags.CobraOnInitialize("EDGECASE", cmd)
 
-				cmd.SetArgs([]string{})
+				cmd.SetArgs(make([]string, 0))
 				err := cmd.Execute()
 				c.Assert(err, qt.IsNil)
 
@@ -183,7 +183,7 @@ func TestEnvironmentVariableEdgeCases(t *testing.T) {
 				flag.Register(cmd)
 				cobraflags.CobraOnInitialize("EDGECASE", cmd)
 
-				cmd.SetArgs([]string{})
+				cmd.SetArgs(make([]string, 0))
 				err := cmd.Execute()
 				c.Assert(err, qt.IsNil)
 
@@ -199,7 +199,7 @@ func TestEnvironmentVariableEdgeCases(t *testing.T) {
 				flag.Register(cmd)
 				cobraflags.CobraOnInitialize("EDGECASE", cmd)
 
-				cmd.SetArgs([]string{})
+				cmd.SetArgs(make([]string, 0))
 				err := cmd.Execute()
 				c.Assert(err, qt.IsNil)
 
@@ -215,7 +215,7 @@ func TestEnvironmentVariableEdgeCases(t *testing.T) {
 				flag.Register(cmd)
 				cobraflags.CobraOnInitialize("EDGECASE", cmd)
 
-				cmd.SetArgs([]string{})
+				cmd.SetArgs(make([]string, 0))
 				err := cmd.Execute()
 				c.Assert(err, qt.IsNil)
 
@@ -230,13 +230,13 @@ func TestEnvironmentVariableEdgeCases(t *testing.T) {
 // when both are set on a flag.
 func TestValidationPrecedence(t *testing.T) {
 	tests := []struct {
-		name                string
-		hasValidateFunc     bool
-		hasValidator        bool
-		validateFuncError   bool
-		validatorError      bool
-		expectedError       string
-		expectedPrecedence  string
+		name               string
+		hasValidateFunc    bool
+		hasValidator       bool
+		validateFuncError  bool
+		validatorError     bool
+		expectedError      string
+		expectedPrecedence string
 	}{
 		{
 			name:               "both_set_validatefunc_takes_precedence",
@@ -291,7 +291,7 @@ func TestValidationPrecedence(t *testing.T) {
 
 			cmd := &cobra.Command{
 				Use: "validation",
-				Run: func(cmd *cobra.Command, args []string) {},
+				Run: func(_ *cobra.Command, _ []string) {},
 			}
 
 			flag := &cobraflags.StringFlag{
@@ -302,7 +302,7 @@ func TestValidationPrecedence(t *testing.T) {
 
 			// Set ValidateFunc if required
 			if tt.hasValidateFunc {
-				flag.ValidateFunc = func(value string) error {
+				flag.ValidateFunc = func(_ string) error {
 					if tt.validateFuncError {
 						return fmt.Errorf("ValidateFunc error")
 					}
@@ -312,7 +312,7 @@ func TestValidationPrecedence(t *testing.T) {
 
 			// Set Validator if required
 			if tt.hasValidator {
-				flag.Validator = cobraflags.ValidatorFunc[string](func(value string) error {
+				flag.Validator = cobraflags.ValidatorFunc[string](func(_ string) error {
 					if tt.validatorError {
 						return fmt.Errorf("Validator error")
 					}

@@ -24,10 +24,15 @@ func TestCobraOnInitialize_ComplexHierarchy(t *testing.T) {
 		"TESTAPP_VERBOSE":       "true",
 	}
 
+	// Set environment variables and defer cleanup
 	for key, value := range envVars {
 		os.Setenv(key, value)
-		defer os.Unsetenv(key)
 	}
+	defer func() {
+		for key := range envVars {
+			os.Unsetenv(key)
+		}
+	}()
 
 	// Create flags
 	globalConfigFlag := &cobraflags.StringFlag{
@@ -65,7 +70,7 @@ func TestCobraOnInitialize_ComplexHierarchy(t *testing.T) {
 	rootCmd := &cobra.Command{
 		Use:   "testapp",
 		Short: "Test application",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			// Root command execution
 		},
 	}
@@ -73,7 +78,7 @@ func TestCobraOnInitialize_ComplexHierarchy(t *testing.T) {
 	serverCmd := &cobra.Command{
 		Use:   "server",
 		Short: "Server commands",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			// Server command execution
 		},
 	}
@@ -81,7 +86,7 @@ func TestCobraOnInitialize_ComplexHierarchy(t *testing.T) {
 	dbCmd := &cobra.Command{
 		Use:   "db",
 		Short: "Database commands",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			// DB command execution
 		},
 	}
@@ -101,7 +106,7 @@ func TestCobraOnInitialize_ComplexHierarchy(t *testing.T) {
 	cobraflags.CobraOnInitialize("TESTAPP", rootCmd)
 
 	// Test root command with global flags
-	rootCmd.SetArgs([]string{})
+	rootCmd.SetArgs(make([]string, 0))
 	err := rootCmd.Execute()
 	c.Assert(err, qt.IsNil)
 
@@ -160,12 +165,12 @@ func TestCobraOnInitialize_SubcommandInheritance(t *testing.T) {
 	// Create command hierarchy
 	rootCmd := &cobra.Command{
 		Use: "inherit",
-		Run: func(cmd *cobra.Command, args []string) {},
+		Run: func(_ *cobra.Command, _ []string) {},
 	}
 
 	subCmd := &cobra.Command{
 		Use: "sub",
-		Run: func(cmd *cobra.Command, args []string) {},
+		Run: func(_ *cobra.Command, _ []string) {},
 	}
 
 	// Register flags
@@ -187,7 +192,7 @@ func TestCobraOnInitialize_SubcommandInheritance(t *testing.T) {
 	c.Assert(verboseFlag.GetBool(), qt.Equals, true)
 
 	// Non-persistent flag should still work from root
-	rootCmd.SetArgs([]string{})
+	rootCmd.SetArgs(make([]string, 0))
 	err = rootCmd.Execute()
 	c.Assert(err, qt.IsNil)
 	c.Assert(configFlag.GetString(), qt.Equals, "test.yaml")
@@ -207,7 +212,7 @@ func TestConcurrentFlagAccess(t *testing.T) {
 
 	cmd := &cobra.Command{
 		Use: "concurrent",
-		Run: func(cmd *cobra.Command, args []string) {},
+		Run: func(_ *cobra.Command, _ []string) {},
 	}
 
 	testFlag.Register(cmd)

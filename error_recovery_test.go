@@ -18,7 +18,7 @@ func TestNoErrorFunction_HappyPath(t *testing.T) {
 	// Test that normal flag registration doesn't cause panics
 	cmd := &cobra.Command{
 		Use: "test",
-		Run: func(cmd *cobra.Command, args []string) {},
+		Run: func(_ *cobra.Command, _ []string) {},
 	}
 
 	// Test various flag types to ensure noError doesn't panic during normal operation
@@ -91,7 +91,7 @@ func TestFlagRegistrationErrors(t *testing.T) {
 
 	cmd := &cobra.Command{
 		Use: "test",
-		Run: func(cmd *cobra.Command, args []string) {},
+		Run: func(_ *cobra.Command, _ []string) {},
 	}
 
 	// Test duplicate flag registration
@@ -122,7 +122,7 @@ func TestRequiredFlagErrors(t *testing.T) {
 
 	cmd := &cobra.Command{
 		Use: "test",
-		Run: func(cmd *cobra.Command, args []string) {},
+		Run: func(_ *cobra.Command, _ []string) {},
 	}
 
 	// Test required flag that is not provided
@@ -136,7 +136,7 @@ func TestRequiredFlagErrors(t *testing.T) {
 	requiredFlag.Register(cmd)
 
 	// Execute without providing required flag should return error
-	cmd.SetArgs([]string{})
+	cmd.SetArgs(make([]string, 0))
 	err := cmd.Execute()
 	c.Assert(err, qt.IsNotNil)
 	c.Assert(err.Error(), qt.Matches, ".*required.*")
@@ -188,7 +188,7 @@ func TestValidationErrors(t *testing.T) {
 
 			cmd := &cobra.Command{
 				Use: "test",
-				Run: func(cmd *cobra.Command, args []string) {},
+				Run: func(_ *cobra.Command, _ []string) {},
 			}
 
 			switch tt.flagType {
@@ -197,7 +197,7 @@ func TestValidationErrors(t *testing.T) {
 					Name:  "test",
 					Usage: "Test flag",
 					Value: "default",
-					ValidateFunc: func(value string) error {
+					ValidateFunc: func(_ string) error {
 						return errors.New(tt.expectedError)
 					},
 				}
@@ -215,7 +215,7 @@ func TestValidationErrors(t *testing.T) {
 					Name:  "test",
 					Usage: "Test flag",
 					Value: 0,
-					ValidateFunc: func(value int) error {
+					ValidateFunc: func(_ int) error {
 						return errors.New(tt.expectedError)
 					},
 				}
@@ -233,7 +233,7 @@ func TestValidationErrors(t *testing.T) {
 					Name:  "test",
 					Usage: "Test flag",
 					Value: false,
-					ValidateFunc: func(value bool) error {
+					ValidateFunc: func(_ bool) error {
 						return errors.New(tt.expectedError)
 					},
 				}
@@ -251,7 +251,7 @@ func TestValidationErrors(t *testing.T) {
 					Name:  "test",
 					Usage: "Test flag",
 					Value: []string{"default"},
-					ValidateFunc: func(value []string) error {
+					ValidateFunc: func(_ []string) error {
 						return errors.New(tt.expectedError)
 					},
 				}
@@ -269,7 +269,7 @@ func TestValidationErrors(t *testing.T) {
 					Name:  "test",
 					Usage: "Test flag",
 					Value: 0,
-					ValidateFunc: func(value uint8) error {
+					ValidateFunc: func(_ uint8) error {
 						return errors.New(tt.expectedError)
 					},
 				}
@@ -292,7 +292,7 @@ func TestViperKeyEdgeCases(t *testing.T) {
 
 	cmd := &cobra.Command{
 		Use: "test",
-		Run: func(cmd *cobra.Command, args []string) {},
+		Run: func(_ *cobra.Command, _ []string) {},
 	}
 
 	// Test flag with nested Viper key

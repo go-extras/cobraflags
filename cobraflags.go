@@ -127,8 +127,9 @@ func (s *FlagBase[T]) validate(v T) (result T, err error) {
 // enabling nested configuration structures and backward compatibility.
 //
 // Example:
-//   Flag with Name="config-file" and ViperKey="app.config.file"
-//   will bind to the "app.config.file" key in Viper instead of "config-file".
+//
+//	Flag with Name="config-file" and ViperKey="app.config.file"
+//	will bind to the "app.config.file" key in Viper instead of "config-file".
 func (s *FlagBase[T]) getViperKey() string {
 	if s.ViperKey != "" {
 		return s.ViperKey
