@@ -21,31 +21,38 @@ func (s *BoolFlag) Register(cmd *cobra.Command) {
 	} else {
 		flags = cmd.Flags()
 	}
-	if s.Shorthand == "" {
-		flags.Bool(s.Name, s.Value, s.Usage)
-	} else {
-		flags.BoolP(s.Name, s.Shorthand, s.Value, s.Usage)
-	}
+
+	flags.BoolP(s.Name, s.Shorthand, s.Value, s.Usage)
+
 	if s.Required {
 		noError(cmd.MarkFlagRequired(s.Name))
 	}
 	s.flag = flags.Lookup(s.Name)
+
+	if s.flag.Annotations == nil {
+		s.flag.Annotations = make(map[string][]string)
+	}
+	s.flag.Annotations[viperKeyAnnotation] = []string{pBoolFlag(s).getViperKey()}
 }
 
 func (s *BoolFlag) GetBool() bool {
+	viperKey := pBoolFlag(s).getViperKey()
+
 	s.bindOnce.Do(func() {
-		noError(viper.BindPFlag(s.Name, s.flag))
+		noError(viper.BindPFlag(viperKey, s.flag))
 	})
 
-	return viper.GetBool(s.Name)
+	return viper.GetBool(viperKey)
 }
 
 func (s *BoolFlag) GetBoolE() (bool, error) {
+	viperKey := pBoolFlag(s).getViperKey()
+
 	s.bindOnce.Do(func() {
-		noError(viper.BindPFlag(s.Name, s.flag))
+		noError(viper.BindPFlag(viperKey, s.flag))
 	})
 
-	v := viper.GetBool(s.Name)
+	v := viper.GetBool(viperKey)
 
 	if result, err := pBoolFlag(s).validate(v); err != nil {
 		return result, err

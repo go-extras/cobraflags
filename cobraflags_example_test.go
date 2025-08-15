@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/go-extras/cobraflags"
 )
@@ -276,4 +277,36 @@ func ExampleCobraOnInitialize() {
 
 	// Output:
 	// Message: from environment
+}
+
+// ExampleStringFlag_withViperKey demonstrates using a custom ViperKey with a StringFlag.
+// ViperKey allows using different configuration keys than flag names for Viper binding.
+func ExampleStringFlag_withViperKey() {
+	// Simulate setting a configuration value using Viper directly
+	// This demonstrates how ViperKey allows different config keys than flag names
+	viper.Set("app.config.file", "custom.yaml")
+	defer viper.Reset()
+
+	configFlag := &cobraflags.StringFlag{
+		Name:     "config-file",
+		ViperKey: "app.config.file", // Custom Viper key for configuration binding
+		Usage:    "Path to configuration file",
+		Value:    "default.yaml",
+	}
+
+	cmd := &cobra.Command{
+		Use:   "myapp",
+		Short: "My application",
+		Run: func(_cmd *cobra.Command, _args []string) {
+			configFile := configFlag.GetString()
+			fmt.Printf("Config file: %s\n", configFile)
+		},
+	}
+
+	configFlag.Register(cmd)
+	cmd.SetArgs(make([]string, 0))
+	_ = cmd.Execute()
+
+	// Output:
+	// Config file: custom.yaml
 }

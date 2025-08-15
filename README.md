@@ -64,6 +64,26 @@ func main() {
 Flags are automatically bound to environment variables using the provided prefix. For example,
 a flag named `example-flag` with the prefix `MYAPP` will be bound to the environment variable `MYAPP_EXAMPLE_FLAG`.
 
+### Custom Viper Keys
+
+By default, flags use their name as the Viper configuration key. You can customize this by setting the `ViperKey` field:
+
+```go
+myFlag := &cobraflags.StringFlag{
+    Name:     "config-file",
+    ViperKey: "app.config.file", // Custom Viper key
+    Usage:    "Path to configuration file",
+    Value:    "config.yaml",
+}
+```
+
+This allows you to:
+- Use different configuration keys than flag names
+- Support nested configuration structures
+- Maintain backward compatibility when renaming flags
+
+If `ViperKey` is empty, the flag will fall back to using its `Name` for Viper binding.
+
 ### Validation
 
 You can add custom validation logic for flags using the `ValidateFunc` field:

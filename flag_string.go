@@ -30,22 +30,31 @@ func (s *StringFlag) Register(cmd *cobra.Command) {
 		noError(cmd.MarkFlagRequired(s.Name))
 	}
 	s.flag = flags.Lookup(s.Name)
+
+	if s.flag.Annotations == nil {
+		s.flag.Annotations = make(map[string][]string)
+	}
+	s.flag.Annotations[viperKeyAnnotation] = []string{pStringFlag(s).getViperKey()}
 }
 
 func (s *StringFlag) GetString() string {
+	viperKey := pStringFlag(s).getViperKey()
+
 	s.bindOnce.Do(func() {
-		noError(viper.BindPFlag(s.Name, s.flag))
+		noError(viper.BindPFlag(viperKey, s.flag))
 	})
 
-	return viper.GetString(s.Name)
+	return viper.GetString(viperKey)
 }
 
 func (s *StringFlag) GetStringE() (string, error) {
+	viperKey := pStringFlag(s).getViperKey()
+
 	s.bindOnce.Do(func() {
-		noError(viper.BindPFlag(s.Name, s.flag))
+		noError(viper.BindPFlag(viperKey, s.flag))
 	})
 
-	v := viper.GetString(s.Name)
+	v := viper.GetString(viperKey)
 
 	if result, err := pStringFlag(s).validate(v); err != nil {
 		return result, err

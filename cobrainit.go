@@ -91,12 +91,17 @@ func PresetRequiredFlags(envPrefix string, flags map[*pflag.Flag]bool, cmd *cobr
 			return
 		}
 
-		envVarName := strings.ToUpper(envPrefix + "_" + strings.ReplaceAll(f.Name, "-", "_"))
+		viperKey := f.Name
+		if annotations := f.Annotations[viperKeyAnnotation]; len(annotations) > 0 {
+			viperKey = annotations[0]
+		}
+
+		envVarName := strings.ToUpper(envPrefix + "_" + strings.ReplaceAll(viperKey, "-", "_"))
 		newUsage := fmt.Sprintf("%s [env: %s]", f.Usage, envVarName)
 		f.Usage = newUsage
 
-		if viper.IsSet(f.Name) && viper.GetString(f.Name) != "" {
-			_ = cmd.Flags().Set(f.Name, viper.GetString(f.Name)) // Set flag value from environment variable.
+		if viper.IsSet(viperKey) && viper.GetString(viperKey) != "" {
+			_ = cmd.Flags().Set(viperKey, viper.GetString(viperKey)) // Set flag value from environment variable.
 		}
 	})
 }
