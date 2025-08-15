@@ -101,7 +101,7 @@ func PresetRequiredFlags(envPrefix string, flags map[*pflag.Flag]bool, cmd *cobr
 		f.Usage = newUsage
 
 		if viper.IsSet(viperKey) && viper.GetString(viperKey) != "" {
-			_ = cmd.Flags().Set(viperKey, viper.GetString(viperKey)) // Set flag value from environment variable.
+			_ = cmd.Flags().Set(f.Name, viper.GetString(viperKey)) // Set flag value from environment variable.
 		}
 	})
 }
