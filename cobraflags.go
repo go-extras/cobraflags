@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/pflag"
 )
 
+const viperKeyAnnotation = "viper-key"
+
 // flagGetter is an interface for getting flag values.
 type flagGetter interface {
 	GetString() string
@@ -37,14 +39,15 @@ type Flag interface {
 
 // FlagBase is a base struct for flags.
 type FlagBase[T any] struct {
-	Name         string
-	Shorthand    string
-	Usage        string
-	Required     bool
-	Persistent   bool
-	Value        T // Default value
-	ValidateFunc func(T) error
-	Validator    Validator
+	Name         string        // Flag name used for command line arguments
+	ViperKey     string        // Custom Viper configuration key (falls back to Name if empty)
+	Shorthand    string        // Single character shorthand for the flag
+	Usage        string        // Help text for the flag
+	Required     bool          // Whether the flag is required
+	Persistent   bool          // Whether the flag is persistent across subcommands
+	Value        T             // Default value
+	ValidateFunc func(T) error // Custom validation function
+	Validator    Validator     // Custom validator implementing the Validator interface
 
 	flag     *pflag.Flag
 	bindOnce sync.Once
@@ -73,6 +76,14 @@ func (s *FlagBase[T]) validate(v T) (result T, err error) {
 	}
 
 	return v, nil
+}
+
+// getViperKey returns the Viper key to use, falling back to Name if ViperKey is empty.
+func (s *FlagBase[T]) getViperKey() string {
+	if s.ViperKey != "" {
+		return s.ViperKey
+	}
+	return s.Name
 }
 
 // Register registers the given flags with the given cobra command.

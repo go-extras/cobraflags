@@ -30,22 +30,31 @@ func (s *StringSliceFlag) Register(cmd *cobra.Command) {
 		noError(cmd.MarkFlagRequired(s.Name))
 	}
 	s.flag = flags.Lookup(s.Name)
+
+	if s.flag.Annotations == nil {
+		s.flag.Annotations = make(map[string][]string)
+	}
+	s.flag.Annotations[viperKeyAnnotation] = []string{pStringSliceFlag(s).getViperKey()}
 }
 
 func (s *StringSliceFlag) GetStringSlice() []string {
+	viperKey := pStringSliceFlag(s).getViperKey()
+
 	s.bindOnce.Do(func() {
-		noError(viper.BindPFlag(s.Name, s.flag))
+		noError(viper.BindPFlag(viperKey, s.flag))
 	})
 
-	return viper.GetStringSlice(s.Name)
+	return viper.GetStringSlice(viperKey)
 }
 
 func (s *StringSliceFlag) GetStringSliceE() ([]string, error) {
+	viperKey := pStringSliceFlag(s).getViperKey()
+
 	s.bindOnce.Do(func() {
-		noError(viper.BindPFlag(s.Name, s.flag))
+		noError(viper.BindPFlag(viperKey, s.flag))
 	})
 
-	v := viper.GetStringSlice(s.Name)
+	v := viper.GetStringSlice(viperKey)
 
 	if result, err := pStringSliceFlag(s).validate(v); err != nil {
 		return result, err

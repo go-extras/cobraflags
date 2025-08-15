@@ -36,7 +36,7 @@ func TestValidatorFunc_Failure(t *testing.T) {
 	})
 
 	err := validator.Validate(-5)
-	c.Assert(err, qt.Not(qt.IsNil))
+	c.Assert(err, qt.IsNotNil)
 	c.Assert(err.Error(), qt.Equals, "value must be non-negative")
 }
 
@@ -52,6 +52,6 @@ func TestValidatorFunc_InvalidType(t *testing.T) {
 	})
 
 	err := validator.Validate("invalid")
-	c.Assert(err, qt.Not(qt.IsNil))
+	c.Assert(err, qt.IsNotNil)
 	c.Assert(err.Error(), qt.Matches, "invalid value type, expected.*")
 }
