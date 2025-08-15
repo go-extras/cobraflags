@@ -251,6 +251,9 @@ func ExampleRegister() {
 
 // ExampleCobraOnInitialize demonstrates environment variable binding.
 func ExampleCobraOnInitialize() {
+	// Reset Viper state to avoid interference from other tests
+	viper.Reset()
+
 	// Set environment variable for demo
 	os.Setenv("MYAPP_MESSAGE", "from environment")
 	defer os.Unsetenv("MYAPP_MESSAGE")
