@@ -10,25 +10,58 @@ import (
 	"github.com/spf13/viper"
 )
 
-var initOnce sync.Once
+// initOnceMap stores sync.Once instances per command to prevent multiple initializations
+// of the same command while allowing different commands to be initialized independently
+var initOnceMap = make(map[*cobra.Command]*sync.Once)
+var initOnceMutex sync.Mutex
 
 var noEnvFlags = map[string]bool{
 	"help": true,
 }
 
-// CobraOnInitialize initializes Cobra command(s) with configurations
-// derived from environment variables. It sets up Viper to automatically
-// detect and bind these variables based on the provided environment
-// variable prefix. This function should be called before executing
-// the Cobra command to ensure all configurations are properly loaded.
+// CobraOnInitialize initializes Cobra command(s) with automatic environment variable binding.
+// This function sets up Viper to automatically detect and bind environment variables
+// to command flags based on the provided prefix. It should be called after registering
+// flags but before executing the Cobra command.
+//
+// Environment Variable Mapping:
+// Flags are automatically mapped to environment variables using the pattern:
+// {envPrefix}_{FLAG_NAME} where FLAG_NAME is the flag name converted to uppercase
+// with hyphens replaced by underscores.
+//
+// Examples:
+//   - Flag "config-file" with prefix "MYAPP" → "MYAPP_CONFIG_FILE"
+//   - Flag "port" with prefix "SERVER" → "SERVER_PORT"
+//   - Flag "verbose" with prefix "CLI" → "CLI_VERBOSE"
+//
+// Custom Viper Keys:
+// If a flag has a custom ViperKey set, the environment variable will be based
+// on the ViperKey instead of the flag name, following the same transformation rules.
 //
 // Parameters:
-// - envPrefix: A string prefix that environment variables must have to be considered by Viper.
-// - commands: A slice of Cobra commands to be initialized.
+//   - envPrefix: Environment variable prefix (without trailing underscore)
+//   - command: Root Cobra command to initialize (subcommands are processed recursively)
 //
-// This function also ensures that all flags for the provided commands
-// are preset with values from the corresponding environment variables if they exist.
+// Usage Example:
+//
+//	cmd := &cobra.Command{Use: "myapp"}
+//	flag := &StringFlag{Name: "config", Value: "config.yaml"}
+//	flag.Register(cmd)
+//	CobraOnInitialize("MYAPP", cmd)  // Binds to MYAPP_CONFIG
+//	cmd.Execute()
+//
+// Note: This function modifies the help function to ensure initialization occurs
+// before help is displayed, and uses sync.Once to prevent multiple initializations.
 func CobraOnInitialize(envPrefix string, command *cobra.Command) {
+	// Get or create a sync.Once for this specific command
+	initOnceMutex.Lock()
+	initOnce, exists := initOnceMap[command]
+	if !exists {
+		initOnce = &sync.Once{}
+		initOnceMap[command] = initOnce
+	}
+	initOnceMutex.Unlock()
+
 	cobraInit := func() {
 		initOnce.Do(func() {
 			visited := make(map[*pflag.Flag]bool)
